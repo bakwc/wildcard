@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ndfa.h"
 
 TNdfa::TNdfa(const std::string &regexp) {
@@ -14,12 +15,11 @@ TNdfa::TNdfa(const std::string &regexp) {
             TState state;
             state.SecondActive = true;
             state.Transition1.Symbol = regexp[i + 1];
-            state.Transition1.StateNum = States.size() + 2;
+            state.Transition1.StateNum = States.size() + 1;
 
             state.Transition2.Symbol = '?';
-            state.Transition2.StateNum = States.size() + 1;
+            state.Transition2.StateNum = States.size();
 
-            States.push_back(state);
             States.push_back(state);
             i++;
         }
