@@ -5,12 +5,8 @@ using namespace std;
 
 int main()
 {
-    TNdfa regexp("s?f");
-
-    regexp.Print();
-
-
-    if (regexp.CheckWord("ssdf")) {
+    TWildcardNdfa wildcard("*@*.com");
+    if (wildcard.Match("example@example.com")) {
         cout << "Matched!\n";
     } else {
         cout << "Not matched!\n";

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ndfa.h"
 
-TNdfa::TNdfa(const std::string &regexp) {
+TWildcardNdfa::TWildcardNdfa(const std::string &regexp) {
     const char* cregexp = regexp.c_str();
     for (size_t i = 0; i < regexp.size() + 1; i++) {
         if (cregexp[i] != '*') {
@@ -24,11 +24,15 @@ TNdfa::TNdfa(const std::string &regexp) {
             i++;
         }
     }
+    Reset();
+}
+
+void TWildcardNdfa::Reset() {
     CurrStates.clear();
     CurrStates.push_back(0);
 }
 
-bool TNdfa::CheckWord(const std::string &word) {
+bool TWildcardNdfa::Match(const std::string &word) {
     CurrStates.clear();
     CurrStates.push_back(0);
     const char* cword = word.c_str();
@@ -42,7 +46,7 @@ bool TNdfa::CheckWord(const std::string &word) {
     return res == RES_Finished;
 }
 
-void TNdfa::Print() {
+void TWildcardNdfa::Print() {
     for (size_t i = 0; i < States.size(); i++) {
         std::cout << i << " -" <<
                      States[i].Transition1.Symbol << "-> " <<
@@ -55,37 +59,35 @@ void TNdfa::Print() {
     }
 }
 
-void CheckAndAdd(std::vector<int>& states,
+bool TWildcardNdfa::CheckAndAdd(std::vector<int>& states,
                  const TTransition& transition,
                  char symbol)
 {
+    bool finished = false;
     if (transition.Symbol == symbol ||
             transition.Symbol == '?')
     {
         states.push_back(transition.StateNum);
+        if (transition.StateNum == (int)States.size()) {
+            finished = true;
+        }
     }
+    return finished;
 }
 
-EResult TNdfa::AddSymbol(char symbol) {
+TWildcardNdfa::EResult TWildcardNdfa::AddSymbol(char symbol) {
     std::vector<int> newStates;
+    bool finishedState = false;
     for (size_t i = 0; i < CurrStates.size(); i++) {
-        CheckAndAdd(newStates,
+        finishedState = finishedState || CheckAndAdd(newStates,
                     States[CurrStates[i]].Transition1,
                     symbol);
         if (States[CurrStates[i]].SecondActive) {
-            CheckAndAdd(newStates,
+            finishedState = finishedState || CheckAndAdd(newStates,
                         States[CurrStates[i]].Transition2,
                         symbol);
         }
     }
-
-    bool finishedState = false;
-    for (size_t i = 0; i < newStates.size(); i++) {
-        if (newStates[i] == States.size()) {
-            finishedState = true;
-        }
-    }
-
     if (newStates.size() == 0) {
         return RES_Failed;
     }
